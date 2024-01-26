@@ -1,0 +1,9 @@
+Node 0 (Leader) wrote data: key_3 -> value_53
+Node 0 (Leader) wrote data: key_8 -> value_76
+Node 0 (Leader) wrote data: key_10 -> value_26
+Node 0 (Leader) wrote data: key_4 -> value_77
+Node 0 (Leader) wrote data: key_4 -> value_90
+Node 0 (Leader) wrote data: key_2 -> value_97
+Node 0 (Leader) wrote data: key_4 -> value_36
+Node 0 (Leader) wrote data: key_6 -> value_34
+Node 0 (Leader) wrote data: key_7 -> value_67
