@@ -46,12 +46,10 @@ class Node:
         self.leader_heartbeat_timeout = 10 # This is critical for your follower's election process
         self.last_communication_time = time.time()
         self.leader_election_lock = threading.Lock()
-        self.leader_log_path = os.path.expanduser('~/Documents/System-Design-Projects/single-leader-replication/leader')
-        self.replication_log_path = os.path.expanduser('~/Documents/System-Design-Projects/single-leader-replication/replicas')
+        self.leader_log_path = os.path.expanduser('~/Documents/System-Design-Projects/Raft-consensus-algorithm/leader')
+        self.replication_log_path = os.path.expanduser('~/Documents/System-Design-Projects/Raft-consensus-algorithm/replicas')
 
-        
-  
-
+    
     
     """
         Check if the file already exists before initializing
@@ -71,6 +69,7 @@ class Node:
                 except FileNotFoundError:
                     print(f"The directory for {replica_log_path} does not exist")
 
+        # If code executed flag as True
         shared_replica_logs_initialized = True
 
 
@@ -78,9 +77,8 @@ class Node:
         Initialize the leader's log file.
     """
     def initialize_leader_logs(self):
-        """
-        Initialize the leader's log file.
-        """
+
+        # Same flag logic as replica but different implementation for the leader
         if not Node.leader_log_initialized:
             self.leader_file_path = os.path.join(self.leader_log_path, f'leader_log_{self.id}.txt')
 
@@ -114,15 +112,16 @@ class Node:
                     logging.info(f"Moved previous leader log to follower folder: {os.path.join(self.replication_log_path, f'replica_log_{self.id}.txt')}")
 
             elif self.state == 'follower' and self.leader_id is not None:
-                new_follower_log_path = os.path.join(self.replication_log_path, f'follower_log_{self.id}.txt')
+                new_follower_log_path = os.path.join(self.replication_log_path, f'replica_log_{self.id}.txt')
                 os.rename(self.leader_file_path, new_follower_log_path)
                 logging.info(f"Moved follower log to: {new_follower_log_path}")
 
                 # If the previous follower's log exists, move it to the follower folder
-                previous_follower_log_path = os.path.join(self.leader_log_path, f'replica_log_{self.leader_id}.txt')
+                previous_follower_log_path = os.path.join(self.leader_log_path, f'leader_log_{self.id}.txt')
                 if os.path.exists(previous_follower_log_path):
-                    shutil.move(previous_follower_log_path, os.path.join(self.replication_log_path, f'replica_log_{self.leader_id}.txt'))
+                    shutil.move(previous_follower_log_path, os.path.join(self.replication_log_path, f'replica_log_{self.id}.txt'))
                     logging.info(f"Moved previous follower log to follower folder: {os.path.join(self.replication_log_path, f'replica_log_{self.leader_id}.txt')}")
+        
         except FileNotFoundError:
             print(f"The directory for {self.leader_log_path} does not exist")
 
@@ -180,23 +179,27 @@ class Node:
                         if node.id != self.id:
                             node.leader_id = self.id
 
-                    
                 
                 logging.info(f"Node {self.id} elected as NEW Leader")
 
                 """
-                    Following it will runs only once!
-                    After first election it will not run again!
-                    Class variable keep tracked from all nodes
+                        Following it will runs only once!
+                        After first election it will not run again!
+                        Class variable keep tracked from all nodes
                 """
+
 
                 if not Node.shared_replica_logs_initialized:
                        
                         self.initialize_replica_logs()
+
+            
                 else:
                     # Election failed, revert back to follower state
                     self.state = 'follower'
                     logging.info(f"Node {self.id} remains follower")
+
+
 
     
     """ 
@@ -343,7 +346,7 @@ class Node:
             and hasn't leader heartbeat,he should start election immediately
         """
 
-        while not self.stop_flag.is_set():
+        while True:
             
             self.remove_follower_replica_logs()
             if self.state == 'follower' or self.state == 'candidate':
@@ -377,7 +380,7 @@ for thread, node in zip(threads, nodes):
     logging.info(f"Node {node.id} started. Current state: {node.state}")
 
 # Allow the simulation to run for some time
-time.sleep(2400)
+time.sleep(20)
 
 # Stop the leader to check the election mode for remaining nodes
 logging.warning("********Sequential stop of leaders ********")
@@ -387,16 +390,19 @@ for node, thread in zip(nodes, threads):
         logging.warning(f"Node {node.id} stopped. Current state: {node.state}")
 
 # Allow some time for the election to happen
-time.sleep(0.5)
+time.sleep(60)
 
-# # Stop the nodes
-# for node, thread in zip(nodes, threads):
-#     node.stop()
+# Stop the nodes
+logging.warning("********Sequential stop of leaders ********")
+for node, thread in zip(nodes, threads):
+    if node.leader_id == node.id:
+        node.stop()
+        logging.warning(f"Node {node.id} stopped. Current state: {node.state}")
 
 # # Wait for all threads to finish
 # for node, thread in zip(nodes, threads):
 #     thread.join()
 #     logging.info(f"Node {node.id} stopped. Final state: {node.state}")
 
-# logging.info("Simulation terminated.")
+logging.info("Simulation terminated.")
 

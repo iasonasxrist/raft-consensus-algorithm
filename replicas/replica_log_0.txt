@@ -1,0 +1,9 @@
+Init!
+Replica 0: Node 3 (Leader) wrote data: key_1 -> value_15
+Replica 0: Node 3 (Leader) wrote data: key_6 -> value_80
+Replica 0: Node 3 (Leader) wrote data: key_5 -> value_90
+Replica 0: Node 3 (Leader) wrote data: key_7 -> value_94
+Replica 0: Node 3 (Leader) wrote data: key_3 -> value_80
+Replica 0: Node 3 (Leader) wrote data: key_6 -> value_18
+Replica 0: Node 3 (Leader) wrote data: key_1 -> value_81
+Replica 0: Node 3 (Leader) wrote data: key_8 -> value_56
